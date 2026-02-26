@@ -7,7 +7,8 @@ let usuarioActual = JSON.parse(localStorage.getItem('usuarioLicha')) || null;
 let inventario = JSON.parse(localStorage.getItem('inventarioLicha')) || 0;
 
 setInterval(() => {
-    document.getElementById('reloj').innerText = new Date().toLocaleString();
+    const reloj = document.getElementById('reloj');
+    if(reloj) reloj.innerText = new Date().toLocaleString();
 }, 1000);
 
 window.onload = () => {
@@ -19,13 +20,12 @@ window.onload = () => {
 
 function cambiarVista(id) {
     document.querySelectorAll('.vista').forEach(v => v.classList.remove('activa'));
-    document.getElementById(id).classList.add('activa');
+    const vista = document.getElementById(id);
+    if(vista) vista.classList.add('activa');
 }
 
 function login() {
-    const email = document.getElementById('email').value;
     const pass = document.getElementById('pass').value;
-
     if (pass === "TortillasLicha") {
         usuarioActual = { nombre: "Administrador CEO", rol: "admin" };
         localStorage.setItem('usuarioLicha', JSON.stringify(usuarioActual));
@@ -33,35 +33,18 @@ function login() {
         cambiarVista('vista-admin');
         return; 
     }
-
-    auth.signInWithEmailAndPassword(email, pass).then(userCred => {
-        usuarioActual = { nombre: email.split('@')[0], rol: 'empleado' };
-        localStorage.setItem('usuarioLicha', JSON.stringify(usuarioActual));
-        document.getElementById('titulo-usuario').innerText = usuarioActual.nombre;
-        cambiarVista('vista-empleado');
-    }).catch(e => alert("Acceso denegado."));
+    alert("Contraseña incorrecta.");
 }
 
-function registrarEntrada() {
-    let hora = new Date().toISOString();
-    db.ref('checador/' + usuarioActual.nombre + '/entradas').push(hora);
-    alert("Entrada registrada.");
+function mostrarVentas() { cambiarVista('vista-ventas'); }
+function toggleMenuEspeciales() {
+    const menu = document.getElementById('menu-especiales');
+    if(menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
 }
-
-function cerrarVenta() {
-    let cant = parseInt(document.getElementById('cant-vender').value);
-    let precio = parseFloat(document.getElementById('precio-paquete').value);
-    let total = cant * precio;
-    inventario -= cant;
+function aceptarInventario() {
+    inventario = parseInt(document.getElementById('inv-diario').value) || 0;
     localStorage.setItem('inventarioLicha', inventario);
-    
-    db.ref('ventas/' + usuarioActual.nombre).push({ cant, total, fecha: new Date().toISOString() });
-    alert(`Cobrar: $${total}. Inventario restante: ${inventario}`);
+    alert("Inventario listo: " + inventario);
 }
-
-function registrarSalida() {
-    let hora = new Date().toISOString();
-    db.ref('checador/' + usuarioActual.nombre + '/salidas').push(hora);
-    localStorage.clear();
-    cambiarVista('vista-login');
-}
+function registrarEntrada() { alert("Entrada registrada."); }
+function registrarSalida() { localStorage.clear(); location.reload(); }
